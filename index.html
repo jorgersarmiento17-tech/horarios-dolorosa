@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Distribución Horaria - UEF La Dolorosa</title>
+    <style>
+        /* Paleta de Colores Institucionales y Tipografía */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            min-h: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Encabezado */
+        header {
+            background-color: #1A365D; /* Azul Rey */
+            color: #ffffff;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-bottom: 5px solid #d97706; /* Borde Ámbar */
+        }
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        header p {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            color: #93c5fd;
+            font-weight: 500;
+        }
+        .creditos {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.4rem 1.2rem;
+            border-radius: 9999px;
+            display: inline-block;
+            font-size: 0.9rem;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            color: #fbbf24;
+        }
+
+        /* Contenedor Principal */
+        main {
+            flex-grow: 1;
+            max-width: 1200px;
+            width: 90%;
+            margin: 1.5rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Panel de Navegación */
+        .panel-navegacion {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        @media (min-width: 768px) {
+            .panel-navegacion { flex-direction: row; justify-content: center; }
+        }
+        .btn-tab {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+        @media (min-width: 768px) { .btn-tab { width: auto; } }
+        
+        .btn-activo {
+            background-color: #1A365D;
+            color: #ffffff;
+            outline: 4px solid #93c5fd;
+        }
+        .btn-inactivo {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        .btn-inactivo:hover { background-color: #d1d5db; }
+
+        /* Sección de Filtros */
+        .seccion-filtros {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        .seccion-filtros h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.25rem;
+            color: #1A365D;
+            border-left: 4px solid #2B6CB0;
+            padding-left: 0.75rem;
+        }
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            color: #374151;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        select:focus {
+            outline: 2px solid #2B6CB0;
+        }
+
+        /* Bloques de Horarios Generados */
+        .cabecera-horario {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media (min-width: 768px) {
+            .cabecera-horario { flex-direction: row; }
+        }
+        .cabecera-horario h3 { margin: 0; font-size: 1.5rem; font-weight: 900; color: #1A365D; text-transform: uppercase; }
+        .cabecera-horario p { margin: 0.25rem 0 0 0; font-size: 0.95rem; color: #6b7280; }
+        .btn-print {
+            background-color: #2B6CB0;
+            color: white;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn-print:hover { background-color: #1d4ed8; }
+
+        /* Estructura de la Tabla Matriz */
+        .tabla-contenedor {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        .overflow-x { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 750px; text-align: center; }
+        th { background-color: #1A365D; color: white; padding: 0.75rem; font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
+        td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; border-right: 1px solid #f3f4f6; height: 5rem; vertical-align: middle; box-sizing: border-box; }
+        tr:hover { background-color: rgba(243, 244, 246, 0.5); }
+        
+        .col-hora { font-weight: 700; color: #374151; background-color: #f9fafb; width: 18%; border-right: 1px solid #e5e7eb; }
+        .num-hora { color: #2B6CB0; font-size: 0.95rem; }
+        .txt-timbre { font-size: 0.65rem; color: #6b7280; font-weight: 400; margin-top: 0.2rem; white-space: pre-line; line-height: 1.2; }
+        
+        /* Estilos de Celdas Activas */
+        .txt-principal { font-weight: 800; color: #111827; font-size: 0.95rem; line-height: 1.2; }
+        .txt-secundario { font-size: 0.75rem; color: #4b5563; margin-top: 0.25rem; font-weight: 500; }
+        .txt-vacio { color: #d1d5db; font-size: 0.85rem; font-weight: 300; }
+
+        /* Fila de Recreo */
+        .fila-recreo { background-color: #fffbeb; color: #92400e; font-weight: 700; }
+        .fila-recreo td { height: auto; padding: 0.5rem; border: 1px solid #fef3c7; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        /* Estado Inicial Vacío */
+        .estado-inicial { background: #ffffff; border-radius: 0.75rem; padding: 2rem; text-align: center; color: #6b7280; border: 2px dashed #d1d5db; font-size: 1rem; }
+
+        /* Footer */
+        footer { background-color: #111827; color: #9ca3af; text-align: center; padding: 1rem; font-size: 0.75rem; margin-top: auto; }
+
+        /* Ajustes de Impresión */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; color: black; }
+            .tabla-contenedor { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
+            td { height: 4.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PORTADA FORMAL INSTITUCIONAL -->
+    <header>
+        <h1>Unidad Educativa Fiscomisional La Dolorosa</h1>
+        <p>Manual de Distribución Horaria General Interactiva</p>
+        <div class="creditos">
+            👨‍💻 <strong>Elaborado por:</strong> Jorge Sarmiento Zumba (Coordinador de la Comisión de Planeamiento)
+        </div>
+    </header>
+
+    <!-- PANEL CENTRAL DE NAVEGACIÓN -->
+    <main>
+        <div class="panel-navegacion no-print">
+            <button id="btnDocentes" onclick="cambiarPerfil('docentes')" class="btn-tab btn-activo">
+                👨‍🏫 Consultar por Cuerpo Docente
+            </button>
+            <button id="btnCursos" onclick="cambiarPerfil('cursos')" class="btn-tab btn-inactivo">
+                🏢 Consultar por Cursos y Paralelos
+            </button>
+        </div>
+
+        <!-- SECCIÓN DE BÚSQUEDA -->
+        <section class="seccion-filtros no-print">
+            <h2 id="tituloFiltro">Seleccione un Docente</h2>
+            <select id="selectorPrincipal" onchange="procesarSeleccion()">
+                <!-- Cargado dinámicamente -->
+            </select>
+        </section>
+
+        <!-- CONTENEDOR DE MATRIZ DE HORARIOS -->
+        <section id="contenedorHorario">
+            <div class="estado-inicial">
+                💡 Por favor, seleccione un elemento del menú superior para desplegar la matriz horaria.
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 UEF La Dolorosa • Sistema de Gestión de Timbres Desfasados Offline
+    </footer>
+
+    <!-- VINCULACIÓN DE LOGÍSTICA LOCAL -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
