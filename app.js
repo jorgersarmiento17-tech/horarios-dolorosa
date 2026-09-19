@@ -135,7 +135,7 @@ function procesarSeleccion() {
             <div class="cabecera-horario">
                 <div>
                     <h3>${valor}</h3>
-                    <p>Horario Individual del Docente • Visualización de Rangos Dobles en la Tarde</p>
+                    <p>Horario Individual del Docente </p>
                 </div>
                 <button onclick="window.print()" class="btn-print no-print">🖨️ Imprimir Horario</button>
             </div>`;
