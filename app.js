@@ -1,5 +1,6 @@
 // APLICACIÓN WEB DE HORARIOS - UEF LA DOLOROSA
-// Versión Estable para Ejecución Local Directa (file:///)
+// Versión Estable Blindada para Ejecución Local y Web Directa
+// Elaborado en colaboración con el Coordinador Jorge Sarmiento Zumba
 
 let perfilActual = 'docentes'; 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -110,7 +111,7 @@ function limpiarContenedor() {
         </div>`;
 }
 
-// 7. PROCESAR SELECCIÓN Y GENERAR TABLA MATRIZ
+// 7. PROCESAR SELECCIÓN Y GENERAR TABLA MATRIZ (CONSTRUCCIÓN SEGURA DE DIAS)
 function procesarSeleccion() {
     const valor = document.getElementById('selectorPrincipal').value;
     if (!valor) {
@@ -144,6 +145,12 @@ function procesarSeleccion() {
             </div>`;
     }
 
+    // Armar las etiquetas de los días de forma concatenada tradicional para evitar fallos de comillas
+    let cabeceraDiasHtml = "";
+    for (let i = 0; i < DIAS_SEMANA.length; i++) {
+        cabeceraDiasHtml += "<th>" + DIAS_SEMANA[i] + "</th>";
+    }
+
     let tablaHtml = `
         <div class="tabla-contenedor">
             <div class="overflow-x">
@@ -151,7 +158,7 @@ function procesarSeleccion() {
                     <thead>
                         <tr>
                             <th class="col-hora">Hora / Timbre</th>
-               \${DIAS_SEMANA.map(d => `<th>${d}</th>`).join('')}            
+                            ` + cabeceraDiasHtml + `
                         </tr>
                     </thead>
                     <tbody>`;
@@ -184,7 +191,7 @@ function procesarSeleccion() {
                         <div class="txt-principal">${clase.Curso}</div>
                         <div class="txt-secundario">${clase.Asignatura}</div>`;
                 } else {
-                    const profesorLimpio = clase.Profesor.replace(/\(.*?\)/g, '').trim();
+                    const profesorLimpio = clase.Profesor.replace(/.*?/g, '').trim();
                     tablaHtml += `
                         <div class="txt-principal">${clase.Asignatura}</div>
                         <div class="txt-secundario">${profesorLimpio}</div>`;
