@@ -151,7 +151,7 @@ function procesarSeleccion() {
                     <thead>
                         <tr>
                             <th class="col-hora">Hora / Timbre</th>
-                            ${DIAS_SEMANA.map(d => `<th>\${d}</th>`).join('')}
+               \${DIAS_SEMANA.map(d => `<th>${d}</th>`).join('')}            
                         </tr>
                     </thead>
                     <tbody>`;
