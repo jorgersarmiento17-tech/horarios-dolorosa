@@ -1,19 +1,21 @@
 // APLICACIÓN WEB DE HORARIOS - UEF LA DOLOROSA
-// Versión Estable Blindada para Ejecución Local y Web Directa
+// Versión Estable Blindada con Motor PWA Offline Total
 // Elaborado en colaboración con el Coordinador Jorge Sarmiento Zumba
 
 let perfilActual = 'docentes'; 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-// 1. MOTOR DE LOGÍSTICA HORARIA INSTITUCIONAL (REGLAS DE TIMBRES)
+// 1. MOTOR DE LOGÍSTICA HORARIA INSTITUCIONAL (REGLAS DE TIMBRES INAMOVIBLES)
 function obtenerRangoHorario(numeroHora, cursoPertenece, formatoDocente = false) {
     const hora = parseInt(numeroHora);
     
+    // Las primeras 4 horas son compartidas para todos (45 minutos)
     if (hora === 1) return "07:00 - 07:45";
     if (hora === 2) return "07:45 - 08:30";
     if (hora === 3) return "08:30 - 09:15";
     if (hora === 4) return "09:15 - 10:00";
 
+    // Formato Rango Doble Descriptivo para el Cuerpo Docente en la tarde
     if (formatoDocente) {
         if (hora === 5) return "EGB: 10:25-11:10\nBach: 10:25-11:05";
         if (hora === 6) return "EGB: 11:10-11:55\nBach: 11:05-11:45";
@@ -22,15 +24,18 @@ function obtenerRangoHorario(numeroHora, cursoPertenece, formatoDocente = false)
         if (hora === 9) return "EGB: 13:25-14:10\nBach: 13:05-13:45";
     }
 
+    // Régimen desfasado por Curso (EGB vs Bachillerato)
     const esBachillerato = /bachillerato|primero|segundo|tercero|ciencias|técnico|tecnico/i.test(cursoPertenece);
 
     if (esBachillerato) {
+        // Régimen Bachillerato (40 minutos continuos)
         if (hora === 5) return "10:25 - 11:05";
         if (hora === 6) return "11:05 - 11:45";
         if (hora === 7) return "11:45 - 12:25";
         if (hora === 8) return "12:25 - 13:05";
         if (hora === 9) return "13:05 - 13:45";
     } else {
+        // Régimen EGB (Octavos, Novenos, Décimos - 45 minutos)
         if (hora === 5) return "10:25 - 11:10";
         if (hora === 6) return "11:10 - 11:55";
         if (hora === 7) return "11:55 - 12:40";
@@ -145,7 +150,6 @@ function procesarSeleccion() {
             </div>`;
     }
 
-    // Armar las etiquetas de los días de forma concatenada tradicional para evitar fallos de comillas
     let cabeceraDiasHtml = "";
     for (let i = 0; i < DIAS_SEMANA.length; i++) {
         cabeceraDiasHtml += "<th>" + DIAS_SEMANA[i] + "</th>";
@@ -191,6 +195,7 @@ function procesarSeleccion() {
                         <div class="txt-principal">${clase.Curso}</div>
                         <div class="txt-secundario">${clase.Asignatura}</div>`;
                 } else {
+                    // Mapeo limpio de docentes sin paréntesis
                     const profesorLimpio = clase.Profesor.replace(/.*?/g, '').trim();
                     tablaHtml += `
                         <div class="txt-principal">${clase.Asignatura}</div>
@@ -206,4 +211,33 @@ function procesarSeleccion() {
 
     tablaHtml += `</tbody></table></div></div>`;
     contenedor.innerHTML = cabeceraHtml + tablaHtml;
+}
+
+// 8. INFRAESTRUCTURA DE SERVICE WORKER PWA (ALMACENAMIENTO OFFLINE PARA CELULARES)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Código del Service Worker embebido en un Blob seguro
+        const blobCode = `
+            const CACHE_NAME = 'dolorosa-horarios-v2';
+            const assets = ['./', './index.html', './data.js', './app.js', './manifest.json', './icono.png'];
+            
+            self.addEventListener('install', e => {
+                e.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
+                );
+            });
+            
+            self.addEventListener('fetch', e => {
+                e.respondWith(
+                    caches.match(e.request).then(res => res || fetch(e.request))
+                );
+            });
+        `;
+        const blob = new Blob([blobCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        
+        navigator.serviceWorker.register(workerUrl)
+            .then(() => console.log("Motor PWA: Activado con éxito institucional"))
+            .catch(err => console.log("Motor PWA: Omitido en entorno de prueba", err));
+    });
 }
