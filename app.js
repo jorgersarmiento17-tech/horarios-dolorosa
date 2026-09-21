@@ -1,12 +1,12 @@
 // APLICACIÓN WEB DE HORARIOS - UEF LA DOLOROSA
-// Versión Estable Blindada con Motor PWA Offline Total
+// Versión Estable Blindada con Rangos Horarios Dobles Unificados (Docentes y Cursos)
 // Elaborado en colaboración con el Coordinador Jorge Sarmiento Zumba
 
 let perfilActual = 'docentes'; 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-// 1. MOTOR DE LOGÍSTICA HORARIA INSTITUCIONAL (REGLAS DE TIMBRES INAMOVIBLES)
-function obtenerRangoHorario(numeroHora, cursoPertenece, formatoDocente = false) {
+// 1. MOTOR DE LOGÍSTICA HORARIA INSTITUCIONAL (REGLAS DE TIMBRES UNIFICADAS)
+function obtenerRangoHorario(numeroHora) {
     const hora = parseInt(numeroHora);
     
     // Las primeras 4 horas son compartidas para todos (45 minutos)
@@ -15,33 +15,13 @@ function obtenerRangoHorario(numeroHora, cursoPertenece, formatoDocente = false)
     if (hora === 3) return "08:30 - 09:15";
     if (hora === 4) return "09:15 - 10:00";
 
-    // Formato Rango Doble Descriptivo para el Cuerpo Docente en la tarde
-    if (formatoDocente) {
-        if (hora === 5) return "EGB: 10:25-11:10\nBach: 10:25-11:05";
-        if (hora === 6) return "EGB: 11:10-11:55\nBach: 11:05-11:45";
-        if (hora === 7) return "EGB: 11:55-12:40\nBach: 11:45-12:25";
-        if (hora === 8) return "EGB: 12:40-13:25\nBach: 12:25-13:05";
-        if (hora === 9) return "EGB: 13:25-14:10\nBach: 13:05-13:45";
-    }
-
-    // Régimen desfasado por Curso (EGB vs Bachillerato)
-    const esBachillerato = /bachillerato|primero|segundo|tercero|ciencias|técnico|tecnico/i.test(cursoPertenece);
-
-    if (esBachillerato) {
-        // Régimen Bachillerato (40 minutos continuos)
-        if (hora === 5) return "10:25 - 11:05";
-        if (hora === 6) return "11:05 - 11:45";
-        if (hora === 7) return "11:45 - 12:25";
-        if (hora === 8) return "12:25 - 13:05";
-        if (hora === 9) return "13:05 - 13:45";
-    } else {
-        // Régimen EGB (Octavos, Novenos, Décimos - 45 minutos)
-        if (hora === 5) return "10:25 - 11:10";
-        if (hora === 6) return "11:10 - 11:55";
-        if (hora === 7) return "11:55 - 12:40";
-        if (hora === 8) return "12:40 - 13:25";
-        if (hora === 9) return "13:25 - 14:10";
-    }
+    // A partir de la 5ta hora, mostramos SIEMPRE el rango doble descriptivo en ambas vistas (Docentes y Cursos)
+    if (hora === 5) return "EGB: 10:25-11:10\nBach: 10:25-11:05";
+    if (hora === 6) return "EGB: 11:10-11:55\nBach: 11:05-11:45";
+    if (hora === 7) return "EGB: 11:55-12:40\nBach: 11:45-12:25";
+    if (hora === 8) return "EGB: 12:40-13:25\nBach: 12:25-13:05";
+    if (hora === 9) return "EGB: 13:25-14:10\nBach: 13:05-13:45";
+    
     return "";
 }
 
@@ -116,7 +96,7 @@ function limpiarContenedor() {
         </div>`;
 }
 
-// 7. PROCESAR SELECCIÓN Y GENERAR TABLA MATRIZ (CONSTRUCCIÓN SEGURA DE DIAS)
+// 7. PROCESAR SELECCIÓN Y GENERAR TABLA MATRIZ
 function procesarSeleccion() {
     const valor = document.getElementById('selectorPrincipal').value;
     if (!valor) {
@@ -135,7 +115,7 @@ function procesarSeleccion() {
             <div class="cabecera-horario">
                 <div>
                     <h3>${valor}</h3>
-                    <p>Horario Individual del Docente </p>
+                    <p>Horario Individual del Docente • Visualización de Rangos Dobles en la Tarde</p>
                 </div>
                 <button onclick="window.print()" class="btn-print no-print">🖨️ Imprimir Horario</button>
             </div>`;
@@ -176,7 +156,8 @@ function procesarSeleccion() {
                 </tr>`;
         }
 
-        const rangoHorarioText = obtenerRangoHorario(h, valor, perfilActual === 'docentes');
+        // Llamamos al motor simplificado que ahora siempre devuelve los dos rangos en la tarde
+        const rangoHorarioText = obtenerRangoHorario(h);
 
         tablaHtml += `<tr>
             <td class="col-hora">
@@ -195,8 +176,7 @@ function procesarSeleccion() {
                         <div class="txt-principal">${clase.Curso}</div>
                         <div class="txt-secundario">${clase.Asignatura}</div>`;
                 } else {
-                    // Mapeo limpio de docentes sin paréntesis
-                    const profesorLimpio = clase.Profesor.replace(/.*?/g, '').trim();
+                    const profesorLimpio = clase.Profesor.replace(/\(.*?\)/g, '').trim();
                     tablaHtml += `
                         <div class="txt-principal">${clase.Asignatura}</div>
                         <div class="txt-secundario">${profesorLimpio}</div>`;
@@ -213,12 +193,11 @@ function procesarSeleccion() {
     contenedor.innerHTML = cabeceraHtml + tablaHtml;
 }
 
-// 8. INFRAESTRUCTURA DE SERVICE WORKER PWA (ALMACENAMIENTO OFFLINE PARA CELULARES)
+// 8. INFRAESTRUCTURA DE SERVICE WORKER PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // Código del Service Worker embebido en un Blob seguro
         const blobCode = `
-            const CACHE_NAME = 'dolorosa-horarios-v2';
+            const CACHE_NAME = 'dolorosa-horarios-v3';
             const assets = ['./', './index.html', './data.js', './app.js', './manifest.json', './icono.png'];
             
             self.addEventListener('install', e => {
@@ -237,7 +216,7 @@ if ('serviceWorker' in navigator) {
         const workerUrl = URL.createObjectURL(blob);
         
         navigator.serviceWorker.register(workerUrl)
-            .then(() => console.log("Motor PWA: Activado con éxito institucional"))
-            .catch(err => console.log("Motor PWA: Omitido en entorno de prueba", err));
+            .then(() => console.log("Motor PWA: Actualizado con éxito"))
+            .catch(err => console.log("Motor PWA: Error", err));
     });
 }
